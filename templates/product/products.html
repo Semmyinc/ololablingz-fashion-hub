@@ -1,0 +1,126 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+            <header class="site-header section-padding d-flex justify-content-center align-items-center">
+                <div class="container">
+                    <div class="row">
+
+                        <div class="col-lg-10 col-12">
+                            <h1>
+                                <span class="d-block text-primary">Choose your</span>
+                                <span class="d-block text-dark">favorite stuffs</span>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section class="products section-padding">
+                <div class="container">
+                    <div class="row">
+                        
+                        <div class="col-12">
+                            <h2 class="mb-2">New Arrivals</h2>
+                            {% if product_count == 1 %}
+                                <p class="lead display-5 text-end">{{product_count}} product found</p>
+                            {% else %}
+                                <p class="lead display-5 text-end">{{product_count}} products found</p>
+                            {% endif %}
+                        </div>
+                        {% if products %}
+                            {% for product in products %}
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="product-thumb">
+                                        <a href="{{product.get_slug_url}}">
+                                            <img src="{{product.image.url}}" class="img-fluid product-image" alt="Product Image">
+                                        </a>
+
+                                        <div class="product-top d-flex">
+                                            <span class="product-alert me-auto">{{product.category}}</span>
+
+                                            <a href="#" class="bi-heart-fill product-icon"></a>
+                                        </div>
+
+                                        <div class="product-info d-flex">
+                                            <div>
+                                                <h5 class="product-title mb-0">
+                                                    <a href="#" class="product-title-link">{{product.product_name}}</a>
+                                                </h5>
+
+                                                <p class="product-p">{{product.description}}</p>
+                                            </div>
+
+                                            {% if promo %}
+                                                <small class="product-price text-muted ms-auto">&#8358 {{product.promo_price}}</small>
+                                            {% else %}
+                                                <small class="product-price text-muted ms-auto">&#8358 {{product.price}}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <div class="col-12">
+                            <h2 class="mb-2">Categories</h2>
+                            {% if product_count == 1 %}
+                                <p class="lead display-5 text-end">{{product_count}} product found</p>
+                            {% else %}
+                                <p class="lead display-5 text-end">{{product_count}} products found</p>
+                            {% endif %}
+                        </div>
+                        {% if products %}
+                            {% for product in products %}
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="product-thumb">
+                                        <a href="#">
+                                            <img src="{{product.image.url}}" class="img-fluid product-image" alt="">
+                                        </a>
+
+                                        <div class="product-top d-flex">
+                                            <a href="#" class="bi-heart-fill product-icon ms-auto"></a>
+                                        </div>
+
+                                    <div class="product-info d-flex">
+                                    <div>
+                                        <h5 class="product-title mb-0">
+                                            <a href="#" class="product-title-link">{{product.product_name}}</a>
+                                        </h5>
+
+                                        <p class="product-p">{{product.description}}</p>
+                                    </div>
+
+                                    {% if promo %}
+                                        <small class="product-price text-muted ms-auto">&#8358 {{product.promo_price}}</small>
+                                    {% else %}
+                                        <small class="product-price text-muted ms-auto">&#8358 {{product.price}}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        
+
+                    </div>
+                </div>
+            </section>
+
+{% endblock %}
+
+
+<div class="col-12">
+                            <h2 class="mb-2">Popular</h2>
+                            {% if product_count == 1 %}
+                                <p class="lead display-5 text-end">{{product_count}} product found</p>
+                            {% else %}
+                                <p class="lead display-5 text-end">{{product_count}} products found</p>
+                            {% endif %}
+                        </div>
+
+                        
+                        
