@@ -104,7 +104,55 @@
                             {% endfor %}
                         {% endif %}
                         
-                        
+<!-- <div class="pagination">
+    {% if products.has_other_pages %}
+    <span class="step-links">
+        {% if products.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ products.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ products.number }} of {{ products.paginator.num_pages }}.
+        </span>
+
+        {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}">next</a>
+            <a href="?page={{ prroducts.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+    {% endif %}
+</div> -->
+
+
+<nav class="mt-4" aria-label="page navigation sample">
+    {% if products.has_other_pages %}
+        <ul class="pagination">
+            
+            {% if products.has_previous %}
+                <li class="page-item"><a href="?page={{products.previous_page_number}}" class="page-link">Previous</a></li>
+            {% else %}
+                <li class="page-item disabled"><a href="#" class="page-link">Previous</a></li>
+            {% endif %}
+
+            
+            {% for i in products.paginator.page_range %}
+                {% if products.number == i %}
+                    <li class="page-item active"><a href="#" class="page-link">{{i}}</a></li>
+                {% else %}
+                    <li class="page-item disabled"><a href="?page={{i}}" class="page-link">{{i}}</a></li>
+                {% endif %}
+            {% endfor %}
+
+
+            {% if products.has_next %}
+                <li class="page-item"><a href="?page={{products.next_page_number}}" class="page-link">Next</a></li>
+            {% else %}
+                <li class="page-item disabled"><a href="#" class="page-link">Next</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</nav>
 
                     </div>
                 </div>
@@ -113,14 +161,62 @@
 {% endblock %}
 
 
-<div class="col-12">
-                            <h2 class="mb-2">Popular</h2>
-                            {% if product_count == 1 %}
-                                <p class="lead display-5 text-end">{{product_count}} product found</p>
-                            {% else %}
-                                <p class="lead display-5 text-end">{{product_count}} products found</p>
-                            {% endif %}
-                        </div>
+ <!-- <div class="col-12">
+    <h2 class="mb-2">Popular</h2>
+    {% if product_count == 1 %}
+        <p class="lead display-5 text-end">{{product_count}} product found</p>
+    {% else %}
+        <p class="lead display-5 text-end">{{product_count}} products found</p>
+    {% endif %}
+</div> -->
 
-                        
-                        
+
+
+
+<!-- <div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div> -->
+
+
+<!-- <nav class="mt-4" aria-label="page navigation sample">
+    {% if products.has_other_pages %}
+        <ul class="pagination">
+            
+            {% if products.has_previous %}
+                <li class="page-item"><a href="?page={{products.previous_page_number}}" class="page-link">Previous</a></li>
+            {% else %}
+                <li class="page-item disabled"><a href="#" class="page-link">Previous</a></li>
+            {% endif %}
+
+            
+            {% for i in products.paginator.page_range %}
+                {% if products.number == i %}
+                    <li class="page-item active"><a href="#" class="page-link">{{i}}</a></li>
+                {% else %}
+                    <li class="page-item disabled"><a href="?page={{i}}" class="page-link">{{i}}</a></li>
+                {% endif %}
+            {% endfor %}
+
+
+            {% if products.has_next %}
+                <li class="page-item"><a href="?page={{products.next_page_number}}" class="page-link">Next</a></li>
+            {% else %}
+                <li class="page-item disabled"><a href="#" class="page-link">Next</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</nav> -->

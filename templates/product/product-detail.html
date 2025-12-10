@@ -64,32 +64,52 @@
                                 <p class="lead mb-5">Over three years in business, We’ve had the chance to work on a variety of projects, with companies</p>
                             </div>
 
-                            <div class="product-cart-thumb row">
-                                <div class="col-lg-6 col-12">
-                                    
-                                    <select class="form-select cart-form-select" id="inputGroupSelect01">
-                                        <option selected>Quantity</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                    </select>
+
+                            {% if specific_product.stock_level <= 0 %}
+                                <div class="product-cart-thumb row">
+                                    <a href="#" class="btn custom-btn cart-btn">Out of Stock</a>
                                 </div>
 
-                                <div class="col-lg-6 col-12 mt-4 mt-lg-0">
-                                    {% if specific_product.stock_level > 0 %}
-                                        <button type="submit" class="btn custom-btn cart-btn" data-bs-toggle="modal" data-bs-target="#cart-modal">Add to Cart</button>
-                                    {% else %}
-                                        <a href="{% url 'products' %}" class="btn custom-btn btn-warning">Out of Stock</a>
-                                    {% endif %}
-                                </div>
+                            {% else %}
 
-                                <p>
+                                {% if not in_cart %}
+
+                                    <div class="product-cart-thumb row">
+                                        <div class="col-lg-6 col-12">
+                                            
+                                            <select class="form-select cart-form-select" id="inputGroupSelect01">
+                                                <option selected>Quantity</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-lg-6 col-12 mt-4 mt-lg-0">
+                                            
+                                                <!-- <a href="{% url 'cart_page' %}" class="btn custom-btn cart-btn" data-bs-toggle="modal" data-bs-target="#cart-modal">Add to Cart</a>-->
+                                                <a href="{% url 'add_cart' specific_product.id %}" class="btn custom-btn cart-btn">Add to Cart</a>
+                                        </div> 
+                                                
+                                {% else %}     
+                                        <div class="product-cart-thumb row">
+                                            <div class="col-lg-6 col-12">
+                                                <a href="#" class="btn cart-btn custom-btn"><span class="text">Added to Cart</span> <i  class="fas fa-check"></i></a> 
+                                            </div>   
+                                            <div class="col-lg-6 col-12">
+                                                <a href="{% url 'cart_page' %}" class="btn cart-btn custom-btn"><span class="text">View Cart</span> <i  class="fas fa-eye"></i></a> 
+                                            </div>   
+                                        </div>
+                                {% endif %}  
+                            {% endif %}
+
+                                <!-- <p>
                                     <a href="#" class="product-additional-link">Details</a>
 
                                     <a href="#" class="product-additional-link">Delivery and Payment</a>
-                                </p>
+                                </p> -->
                             </div>
 
                         </div>

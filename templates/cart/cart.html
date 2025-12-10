@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        {% if not cart_items %}
+        <br><br><br><br><br>
+            <h5 class="text-center">There are no items in your cart yet. Proceed to <a href="{% url 'products' %}">Shopping</a></h5>
+            <br><br><br><br>
+        {% else %}
+            <br><br><br><br><br>
+        <div class="row">
+            <aside class="col-lg-9">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="fw-5 fst-bold p-1 my-1">Inside your cart</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- <h5 class="card-title">Special title treatment</h5> -->
+                        <p class="card-text"> 
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                    <th scope="col">Product Image</th>
+                                    <!-- <th scope="col">Product Name</th> -->
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if cart_items %}
+                                        {% for cart_item in cart_items %}
+                                            <tr>
+                                    <th scope="row g-0 align-items-center">
+                                        <div class="row align-items-center">
+                                            <div class="col">
+                                                <figure class="figure">
+                                                    <img src="{{cart_item.product.image.url}}" class="figure-img img-fluid rounded" alt="product image" style="width: 70px; height: 60px;">
+                                                    <!-- <figcaption class="figure-caption">A caption for the above image.</figcaption> -->
+                                                </figure>
+                                            </div>
+                                            <div class="col">
+                                                <p class="text-bold mb-0">{{cart_item.product.product_name}}</p>
+                                                <p class="mb-0 text-muted small">size:value</p>
+                                                <p class="mt-0 text-muted small">color:value</p>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <td align="">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <a href="{% url 'remove_cart' cart_item.product.id %}" class="btn btn-light" type="button" id="button-plus"><i class="fa fa-minus"></i></a>
+                                            </div>
+                                            <input type="text" class="form-contol text-muted text-center" value="{{cart_item.quantity}}" style="width: 25px; height: 35px; border-style: solid;">
+                                            <div class="input-group-append">
+                                                <a href="{% url 'add_cart' cart_item.product.id %}" class="btn btn-light" type="button" id="button-minus" ><i class="fa fa-plus"></i></a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                    {% if cart_item.product.promo %}
+                                        <div>
+                                            <p class="mb-0">&#8358 {{cart_item.sub_total}}</p>
+                                            <small class="text-muted mt-0">&#8358 {{cart_item.product.promo_price}} each</small>
+                                        </div>
+                                    {% else %}
+                                        <div>
+                                            <p class="mb-0">&#8358 {{cart_item.sub_total}}</p>
+                                            <small class="text-muted mt-0">&#8358 {{cart_item.product.price}} each</small>
+                                        </div>
+                                    {% endif %}
+                                    </td>
+                                    <td><a href="{% url 'remove_cart_item' cart_item.product.id %}" class="btn btn-sm btn-danger">Remove</a></td>
+                                    </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                     
+                                </tbody>
+                            </table>
+                        </p>
+                        <!-- <a href="#" class="btn btn-primary">Go somewhere</a> -->
+                    </div>
+                </div>
+                
+                
+            </aside>
+            
+            <aside class="col-lg-3">
+                <div class="card">
+                <div class="card-header">
+                    Product Cost
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col">Total Price:</div>
+                        <div class="col" align="right">&#8358 {{total}}</div>
+                    </div>
+                    <div class="row mb-2 mt-3">
+                        <div class="col">Tax:</div>
+                        <div class="col" align="right">&#8358 {{tax}}</div>
+                    </div>
+                    <div class="row mt-3 mb-0">
+                        <div class="col mb-0">Grand Total:</div>
+                        <div class="col mb-0" align="right">&#8358 {{grand_total}}</div>
+                    </div>
+                    <br>
+                    <div class="align-items-center" align="center">
+                        <a href="#" class="btn btn-primary mb-2 mt-0"> Checkout </a>
+                        <a href="{% url 'products' %}" class="btn btn-light">Continue Shopping</a>
+                        <i class="fa fa-car"></i>
+                    </div>
+                </div>
+                </div>
+            </aside>
+        </div>
+
+        {% endif %}
+    </div> <!-- container .//  -->
+</section> 
+<br>
+
+
+{% endblock %}
+
+
+<div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Inside your cart</h5>
+                        <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
+                       
+                    </div>
+                </div>
+
+
+<div class="card">
+  <div class="card-header">
+    Featured
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">Special title treatment</h5>
+    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+    <a href="#" class="btn btn-primary">Go somewhere</a>
+  </div>
+</div>
+
+
+<dl class="dlist-align">
+                        <dt>Total price:</dt>
+                        <dd class="text-right">$2</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                        <dt>Tax:</dt>
+                        <dd class="text-right"> $5</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                        <dt>Grand Total:</dt>
+                        <dd class="text-right text-dark b"><strong>$10</strong></dd>
+                        </dl>
+                        <hr>
+                        <p class="text-center mb-3">
+                            <img src="#" height="26">
+                        </p>
+                        <a href="#" class="btn btn-primary btn-block"> Checkout </a>
+                        <a href="#" class="btn btn-light btn-block">Continue Shopping</a>

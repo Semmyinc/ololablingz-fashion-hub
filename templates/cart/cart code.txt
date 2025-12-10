@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Shopping Cart</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="fonts.googleapis.com" rel="stylesheet">
+</head>
+<body>
+    <div class="cart-container">
+        <h1>Your Shopping Cart</h1>
+
+        <!-- Cart Items Section -->
+        <div class="cart-items">
+            <div class="cart-item">
+                <img src="via.placeholder.com" alt="Product Image" class="item-image">
+                <div class="item-details">
+                    <div class="item-name">Sample Product 1</div>
+                    <div class="item-price">$19.99</div>
+                </div>
+                <div class="item-quantity">Quantity: 1</div>
+                <button class="remove-btn">Remove</button>
+            </div>
+            
+            <div class="cart-item">
+                <img src="via.placeholder.com" alt="Product Image" class="item-image">
+                <div class="item-details">
+                    <div class="item-name">Sample Product 2</div>
+                    <div class="item-price">$45.00</div>
+                </div>
+                <div class="item-quantity">Quantity: 2</div>
+                <button class="remove-btn">Remove</button>
+            </div>
+        </div>
+
+        <!-- Cart Summary Section -->
+        <div class="cart-summary">
+            <div class="summary-item">
+                <span>Subtotal:</span>
+                <span>$109.99</span>
+            </div>
+            <div class="summary-item">
+                <span>Shipping:</span>
+                <span>$5.00</span>
+            </div>
+            <div class="summary-item total">
+                <span>Total:</span>
+                <span>$114.99</span>
+            </div>
+            <button class="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+</body>
+</html>
+
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.cart-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 80%;
+    max-width: 800px;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f4f4f4;
+    padding-bottom: 10px;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.item-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    margin-right: 15px;
+}
+
+.item-details {
+    flex-grow: 1;
+}
+
+.item-name {
+    font-weight: bold;
+    color: #555;
+}
+
+.item-price {
+    color: #888;
+}
+
+.item-quantity {
+    margin-right: 20px;
+    color: #666;
+}
+
+.remove-btn {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.remove-btn:hover {
+    background-color: #e60000;
+}
+
+.cart-summary {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #f4f4f4;
+    text-align: right;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.summary-item.total {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
+
+.checkout-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+.checkout-btn:hover {
+    background-color: #218838;
+}
+
+

@@ -16,9 +16,9 @@
 
                     <div class="collapse navbar-collapse" id="navbarNav">
                         <ul class="navbar-nav mx-auto">
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 <a class="nav-link active" href="{% url 'home' %}">Gallery</a>
-                            </li>
+                            </li> -->
 
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
@@ -30,27 +30,59 @@
                                 </ul>
                             </li>
 
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 <a class="nav-link" href="about.html">Story</a>
-                            </li>
+                            </li> -->
 
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'products' %}">Products</a>
                             </li>
 
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 <a class="nav-link" href="faq.html">FAQs</a>
-                            </li>
+                            </li> -->
 
                             <li class="nav-item">
                                 <a class="nav-link" href="contact.html">Contact</a>
                             </li>
+                            <li class="nav-item">
+                                <!-- <a href="{% url 'cart_page' %}" class="widget-header pl-3 ml-3">
+                                    <div class="icon icon-sm rounded-circle-boarder"><i class="fa fa-shopping-cart"></i></div>
+                                    <span class="badge badge-pill badge-danger-notify">{{cart_counter|length}}</span>
+                                </a> -->
+                                
+                                
+                                
+                                
+                                <a href="{% url 'cart_page' %}">
+                                    <i class="bi-cart-fill me-1"></i>
+                                    Cart
+                                    <span class="badge bg-danger ms-1 rounded-pill text-white">{{cart_counter|length}}</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                
+                            </li>
+
                         </ul>
 
+                        <div class="d-none d-lg-block mx-auto">
+                            <form class="d-flex" role="search" method="POST" action="{% url 'search' %}">
+                                {% csrf_token %}
+                                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search", name="search">
+                                <button class="btn btn-outline-success" type="submit">Search</button>
+                            </form>
+                        </div>
+
                         <div class="d-none d-lg-block">
+                            
                             <a href="sign-in.html" class="bi-person custom-icon me-3"></a>
 
                             <a href="product-detail.html" class="bi-bag custom-icon"></a>
+                            
+                            
+            
                         </div>
                     </div>
                 </div>

@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'product',
     'users',
+    'cart',
+    'fontawesomefree',
 ]
 
 MIDDLEWARE = [
@@ -66,6 +68,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 'product.context_processors.category_menu_links',
+                'cart.context_processors.cart_counter',
             ],
         },
     },
