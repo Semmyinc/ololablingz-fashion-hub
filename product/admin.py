@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, SimilarProduct
+from .models import Category, Product, SimilarProduct, Variation
 from django.utils.html import format_html
 import admin_thumbnails
 # Register your models here.
@@ -45,3 +45,11 @@ admin.site.register(Product, ProductAdmin)
     
 
 admin.site.register(SimilarProduct)
+
+class VariationAdmin(admin.ModelAdmin):
+    list_display = ('product', 'variation_category', 'variation_value', 'is_active')
+    # list_display_links = ['variation_category']
+    list_editable = ['is_active']
+    list_filter = ('product', 'variation_category', 'variation_value')
+                   
+admin.site.register(Variation, VariationAdmin)

@@ -49,3 +49,32 @@ class SimilarProduct(models.Model):
     
     class Meta:
         verbose_name_plural =' Similar Product'
+
+
+class VariationManager(models.Manager):
+    def colors(self):
+        return super(VariationManager, self).filter(variation_category='color', is_active=True)
+
+    def sizes(self):
+        return super(VariationManager, self).filter(variation_category='size', is_active=True)
+
+
+variation_category_choice = (
+    ('color', 'color'),
+    ('size', 'size')
+)
+
+
+class Variation(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    variation_category = models.CharField(max_length=255, choices=variation_category_choice)
+    variation_value = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        # return self.product
+        return self.variation_value
+    
+    objects = VariationManager()
+

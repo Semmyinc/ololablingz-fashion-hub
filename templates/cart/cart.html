@@ -24,58 +24,95 @@
                             <table class="table table-borderless">
                                 <thead>
                                     <tr>
-                                    <th scope="col">Product Image</th>
-                                    <!-- <th scope="col">Product Name</th> -->
-                                    <th scope="col">Quantity</th>
-                                    <th scope="col">Price</th>
-                                    <th scope="col"></th>
+                                        <th scope="col" align="right">Product</th>
+                                        <!-- <th scope="col">Product Name</th> -->
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% if cart_items %}
                                         {% for cart_item in cart_items %}
                                             <tr>
-                                    <th scope="row g-0 align-items-center">
-                                        <div class="row align-items-center">
-                                            <div class="col">
-                                                <figure class="figure">
-                                                    <img src="{{cart_item.product.image.url}}" class="figure-img img-fluid rounded" alt="product image" style="width: 70px; height: 60px;">
-                                                    <!-- <figcaption class="figure-caption">A caption for the above image.</figcaption> -->
-                                                </figure>
-                                            </div>
-                                            <div class="col">
-                                                <p class="text-bold mb-0">{{cart_item.product.product_name}}</p>
-                                                <p class="mb-0 text-muted small">size:value</p>
-                                                <p class="mt-0 text-muted small">color:value</p>
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <td align="">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <a href="{% url 'remove_cart' cart_item.product.id %}" class="btn btn-light" type="button" id="button-plus"><i class="fa fa-minus"></i></a>
-                                            </div>
-                                            <input type="text" class="form-contol text-muted text-center" value="{{cart_item.quantity}}" style="width: 25px; height: 35px; border-style: solid;">
-                                            <div class="input-group-append">
-                                                <a href="{% url 'add_cart' cart_item.product.id %}" class="btn btn-light" type="button" id="button-minus" ><i class="fa fa-plus"></i></a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                    {% if cart_item.product.promo %}
-                                        <div>
-                                            <p class="mb-0">&#8358 {{cart_item.sub_total}}</p>
-                                            <small class="text-muted mt-0">&#8358 {{cart_item.product.promo_price}} each</small>
-                                        </div>
-                                    {% else %}
-                                        <div>
-                                            <p class="mb-0">&#8358 {{cart_item.sub_total}}</p>
-                                            <small class="text-muted mt-0">&#8358 {{cart_item.product.price}} each</small>
-                                        </div>
-                                    {% endif %}
-                                    </td>
-                                    <td><a href="{% url 'remove_cart_item' cart_item.product.id %}" class="btn btn-sm btn-danger">Remove</a></td>
-                                    </tr>
+                                                <td scope="row g-0">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <figure>
+                                                                <div><img src="{{cart_item.product.image.url}}" class="figure-img img-fluid rounded" alt="product image" style="width: 70px; height: 60px;"></div>
+                                                                
+                                                            </figure>
+                                                        </div>
+                                                        <div class="col">
+                                                            <figcaption class="info">
+                                                                    <a href="{{cart_item.product.get_slug_url}}">{{cart_item.product.product_name}}</a>
+                                                                    <p class="text-muted small">
+                                                                        {% if cart_item.variations.all %}
+                                                                            {% for item in cart_item.variations.all %}
+                                                                                {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
+                                                                            {% endfor %}
+                                                                        {% endif %}
+                                                                    </p>
+                                                                </figcaption>
+                                                        </div>
+
+
+
+
+
+
+
+
+                                                        <!-- <div class="col"> -->
+                                                            <!-- <figure class="figure"> -->
+                                                                <!-- <img src="{{cart_item.product.image.url}}" class="figure-img img-fluid rounded" alt="product image" style="width: 70px; height: 60px;"> -->
+                                                                <!-- <figcaption class="figure-caption">A caption for the above image.</figcaption> -->
+                                                            <!-- </figure> -->
+                                                        <!-- </div> -->
+                                                        <!-- <div class="col"> -->
+                                                            <!-- <p class="text-bold mb-0 pb-0">{{cart_item.product.product_name}}</p> -->
+                                                            <!-- {% if cart_item.variations.all %} -->
+                                                                <!-- {% for item in cart_item.variations.all %} -->
+                                                                    <!-- <p class="mb-0 text-muted small">{{item.variation_category}}:{{item.variation_value}}</p> -->
+                                                                    <!-- <p class="text-muted small my-0">{{item.variation_category | capfirst}}:{{item.variation_value | capfirst}}</p> -->
+                                                            
+                                                                <!-- {% endfor %} -->
+                                                            <!-- {% endif %} -->
+                                                        <!-- </div> -->
+                                                    <!-- </div> -->
+                                                </td>
+                                                <td align="">
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-plus"><i class="fa fa-minus"></i></a>
+                                                        </div>
+                                                        <input type="text" class="form-contol text-muted text-center" value="{{cart_item.quantity}}" style="width: 25px; height: 35px; border-style: solid;">
+                                                        <div class="input-group-append">
+                                                            <form action="{% url 'add_cart' cart_item.product.id %}" method="POST">
+                                                                {% csrf_token %}
+                                                                {% for varied_item in cart_item.variations.all %}
+                                                                    <input type="hidden" name="{{varied_item.variation_category | lower}}" value="{{varied_item.variation_value | capfirst}}">
+                                                                {% endfor %}
+                                                                <button class="btn btn-light" type="submit" id="button-minus" ><i class="fa fa-plus"></i></button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {% if cart_item.product.promo %}
+                                                        <div>
+                                                            <p class="mb-0">&#8358 {{cart_item.sub_total}}</p>
+                                                            <small class="text-muted mt-0">&#8358 {{cart_item.product.promo_price}} each</small>
+                                                        </div>
+                                                    {% else %}
+                                                        <div>
+                                                            <p class="mb-0">&#8358 {{cart_item.sub_total}}</p>
+                                                            <small class="text-muted mt-0">&#8358 {{cart_item.product.price}} each</small>
+                                                        </div>
+                                                    {% endif %}
+                                                </td>
+                                                <td><a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id %}" class="btn btn-sm btn-danger">Remove</a></td>
+                                            </tr>
                                         {% endfor %}
                                     {% endif %}
                                      
