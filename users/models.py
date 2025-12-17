@@ -43,7 +43,7 @@ class Users(AbstractBaseUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
-    phone = models.CharField(max_length=50, unique=True)
+    phone = models.CharField(max_length=50)
     email = models.EmailField(unique=True)
 
     # required fields 
@@ -72,4 +72,4 @@ class Users(AbstractBaseUser):
     
 
     class Meta:
-        verbose_name = 'User'
+        verbose_name_plural = 'Users'

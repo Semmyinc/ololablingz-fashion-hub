@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <section class="section-content padding-y bg">
+        <div class="container">
+            
+                
+            <br><br><br><br><br>
+
+            <div class="row">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+                            {{message}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif%}                     
+                <aside class="col-lg-3">
+                    <div class="card">
+                        <!-- <div class="card-header">
+                            
+                        </div> -->
+                        
+                        <div class="card-body">
+                            <div class="list-group">
+                                <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                                    My Dashboard
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">My Order History</a>
+                                <a href="#" class="list-group-item list-group-item-action">Received Orders</a>
+                                <a href="#" class="list-group-item list-group-item-action">Transactions</a>
+                                <a href="#" class="list-group-item list-group-item-action disabled" aria-disabled="true">Settings</a>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                <aside class="col-lg-9">
+                                                 
+                    <ul class="list-group">
+                              
+                                <li class="list-group-item small d-flex justify-content-between">
+                                    <p class="small">Order ID: </p>
+                                    <p class="small">Order Date: </p>
+                                </li>
+                                
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col">
+                                            <p class="small">Delivery to:</p>
+                                            
+                                        </div>
+                                        <div class="col">
+                                            <p class="small">Payment Details</p>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <td scope="row g-0">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <figure>
+                                                                <div><img src="#" class="figure-img img-fluid rounded" alt="product image" style="width: 70px; height: 60px;"></div>
+                                                            </figure>
+                                                        </div>
+                                                        <div class="col">
+                                                            <figcaption class="info">
+                                                                <p class="small mb-0">Product name</p>
+                                                                <p class="text-muted small mt-0">Price</p>
+                                                            </figcaption>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <p class="small mb-0">Vendor</p>
+                                                    <p class="small mt-0">Vendor name</p>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-outline-primary btn-small">Track Order</button>
+                                                </td>
+                                                <td><a href="#" class="btn btn-sm btn-light">Details</a></td>
+                                            </tr>                                     
+                                        </tbody>
+                                    </table>
+
+                                </li>
+                                
+                            </ul>
+                </aside>
+            </div>
+
+        
+        </div> <!-- container .//  -->
+    </section> 
+    <br>
+
+{% endblock %}
+
+
+
+
