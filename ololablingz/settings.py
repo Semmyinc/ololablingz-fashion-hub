@@ -141,8 +141,8 @@ MEDIA_URL = "/media/"
 # smtp configuration
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'stephen.esuola@gmail.com'
-EMAIL_HOST_PASSWORD = 'xfswqfvguzyyurtu'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True 
 
 # Default primary key field type
