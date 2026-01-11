@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <br><br><br><br><br><br>
+        <h4 class="text-center text-secondary">Review your Order and make payment</h4>
+        <!-- <form action="" method="POST"> -->
+            {% csrf_token %}
+            <div class="row">
+                <aside class="col-lg-8">
+
+                    <div class="card">
+                        <h5 class="card-header">Billing Information</h5>
+                        <div class="card-body">
+                            <p class="card-text mb-0 small"><b>Name: </b> {{order.full_name}}</p>
+                            <p class="card-text mb-0 small"> <b>Address: </b>{{order.address}}</p>
+                            <p class="card-text mb-0 small"> <b>City: </b>{{order.city}}</p>
+                            <p class="card-text mb-0 small"> <b>State: </b>{{order.state}}</p>
+                            <p class="card-text mb-0 small"> <b>Country </b>{{order.country}}</p>
+                            <p class="card-text mb-0 small"><b>Email: </b> {{order.email}}</p> 
+                            <p class="card-text mb-0 small"><b>Phone: </b> {{order.phone}}</p>
+                            {% if order.order_note %}
+                            <p class="card-text mb-0 small"> <b>Order Note: </b> {{order.order_note}}</p>  
+                            {% endif %}    
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h5 class="card-header">Payment Method</h5>
+                        <div class="card-body">
+                            <p class="card-text small">Cash/Transfer</p>   
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h5 class="card-header">Product Review</h5>
+                        <div class="card-body">
+                            <p class="card-text"> 
+                                <table class="table table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" align="right">Product</th>
+                                            <!-- <th scope="col">Product Name</th> -->
+                                            <th scope="col">Quantity</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if cart_items %}
+                                            {% for cart_item in cart_items %}
+                                                <tr>
+                                                    <td scope="row g-0">
+                                                        <div class="row align-items-center">
+                                                            <div class="col">
+                                                                <figure>
+                                                                    <div><img src="{{cart_item.product.image.url}}" class="figure-img img-fluid rounded" alt="product image" style="width: 70px; height: 60px;"></div>
+                                                                    
+                                                                </figure>
+                                                            </div>
+                                                            <div class="col">
+                                                                <figcaption class="info">
+                                                                        <a href="{{cart_item.product.get_slug_url}}">{{cart_item.product.product_name}}</a>
+                                                                        <p class="text-muted small">
+                                                                            {% if cart_item.variations.all %}
+                                                                                {% for item in cart_item.variations.all %}
+                                                                                    {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
+                                                                                {% endfor %}
+                                                                            {% endif %}
+                                                                        </p>
+                                                                    </figcaption>
+                                                            </div>
+                                                    </td>
+                                                    <td align="">
+                                                      
+                                                        {{cart_item.quantity}}
+                                                    </td>
+                                                    <td>
+                                                        {% if cart_item.product.promo %}
+                                                            <div>
+                                                                <p class="mb-0">&#8358 {{cart_item.sub_total}}</p>
+                                                                <small class="text-muted mt-0">&#8358 {{cart_item.product.promo_price}} each</small>
+                                                            </div>
+                                                        {% else %}
+                                                            <div>
+                                                                <p class="mb-0">&#8358 {{cart_item.sub_total}}</p>
+                                                                <small class="text-muted mt-0">&#8358 {{cart_item.product.price}} each</small>
+                                                            </div>
+                                                        {% endif %}
+                                                    </td>
+                                                    
+                                                </tr>
+                                            {% endfor %}
+                                        {% endif %}
+                                        
+                                    </tbody>
+                                </table>
+                        </p>   
+                        </div>
+                    </div>
+                    
+                    
+                </aside>
+                
+                <aside class="col-lg-4">
+                    <div class="card">
+                        
+                            <h5 class="card-header">Payment Summary</h5>
+                        
+                    
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col">Total Price:</div>
+                                <div class="col" align="right">&#8358 {{total}}</div>
+                            </div>
+                            <div class="row mb-2 mt-3">
+                                <div class="col">Tax:</div>
+                                <div class="col" align="right">&#8358 {{tax}}</div>
+                            </div>
+                            <div class="row mt-3 mb-0">
+                                <div class="col mb-0">Grand Total:</div>
+                                <div class="col mb-0" align="right">&#8358 {{grand_total}}</div>
+                            </div>
+                            <br>
+                            <div class="row align-items-center px-2" align="center">
+                                <a href="{% url 'paystack_checkout' order.id %}" class="btn btn-primary mb-2 mt-0"><button class="btn btn-primary">Pay with Paystack</button></a>
+                                <a href="{% url 'stripe_checkout' order.id %}" class="btn btn-primary mb-2 mt-0"><button class="btn btn-primary">Pay with Stripe</button></a>
+                                <!-- <a href="" class="btn btn-primary mb-2 mt-0"> Make Payment </a> -->
+                                <!-- <a href="{% url 'products' %}" class="btn btn-dark">Continue Shopping</a> -->
+                                <!-- <form method="POST" action="{% url 'charge' %}">
+                                    {% csrf_token %}
+                                    <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                        data-key="{{key}}"
+                                        data-description="Payment Gateway"
+                                        data-amount="{{grand_total}}"
+                                        data-locale="auto">
+                                    </script>
+                                </form> -->
+                            </div>
+                            
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        <!-- </form> -->
+
+       
+    </div> <!-- container .//  -->
+</section> 
+<br>
+
+<!-- <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-key="{{key}}"
+    data-description="Product Charge"
+    data-amount="{{grand_total}}"
+    data-locale="auto">
+</script> -->
+
+{% endblock %}
+
+

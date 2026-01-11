@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <br><br><br><br><br><br><br><br>
+    <div class="container">
+        <p class="lead display-5 text-success text-center">Payment Successful for order {{order.first_name | capfirst}} | {{order.order_number}}</p>
+        <br><br><br>
+    </div>
+{% endblock %}

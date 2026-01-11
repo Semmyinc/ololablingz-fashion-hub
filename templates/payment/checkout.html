@@ -6,7 +6,7 @@
 <section class="section-content padding-y bg">
     <div class="container">
         <br><br><br><br><br>
-        <form action="" method="POST">
+        <form action="{% url 'create_order' %}" method="POST">
             {% csrf_token %}
             <div class="row">
                 <aside class="col-lg-6">
