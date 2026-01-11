@@ -146,13 +146,11 @@ MEDIA_URL = "/media/"
 # smtp configuration
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-<<<<<<< HEAD
+
 EMAIL_HOST_USER =config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-=======
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
->>>>>>> 96964e566b3b5b95930f61620ef08e139b2db310
+
+
 EMAIL_USE_TLS = True 
 
 

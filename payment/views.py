@@ -106,6 +106,27 @@ def create_order(request, total=0, quantity=0):
                 data.save()
 
                 order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=False)
+
+                # cart_item = CartItem.objects.get(user=request.user)
+                for item in cart_items:
+                    order_item = OrderItem()
+                    order_item.order_id = order.id 
+                    order_item.user_id = request.user.id
+                    # order_item.payment = payment
+                    order_item.quantity = item.quantity 
+                    order_item.price = item.product.price 
+                    order_item.product_id = item.product.id
+                    # order_item.is_ordered = True      
+                    order_item.save()
+
+                    # copy variations (many-to-many)
+                    # cart_item = CartItem.objects.get(id=item.id)
+                    # product_variation = cart_item.variations.all()
+                    # order_item = OrderItem.objects.get(id=order_item.id)
+                    # order_item.variation.set(product_variation)
+                    order_item.variation.set(item.variations.all())
+                    order_item.save()
+
                 context = {'order':order, 'tax':tax, 'total':total, 'grand_total':grand_total, 'cart_items':cart_items}
                 # return redirect('checkout')
                 return render(request, 'payment/payments.html', context)
@@ -131,49 +152,58 @@ def payments(order_id, user_id, payment_id, payment_method, amount_paid, status)
     order.payment = payment
     order.is_ordered = True
     order.save()
+    # print(order)
+    # cart_items = CartItem.objects.filter(user=request.user)
 
-    cart_items = CartItem.objects.filter(user=user)
-
-    for item in cart_items:
-        # order_item = OrderItem.objects.create(
-        #     order=order,
-        #     user=user,
-        #     payment=payment,
-        #     product=item.product,
-        #     quantity=item.quantity,
-        #     price=item.product.price,
-        #     is_ordered=True,
-        # )
-        order_item = OrderItem()
-        order_item.order_id = order.id 
-        order_item.user_id = user.id
+    order_items = OrderItem.objects.filter(order=order)
+    print(order_items)
+    for order_item in order_items:
         order_item.payment = payment
-        order_item.quantity = item.quantity 
-        order_item.price = item.product.price 
-        order_item.product_id = item.product.id
-        order_item.is_ordered = True      
+        order_item.is_ordered = True
         order_item.save()
+    # print(order_items)
+
+    # for item in cart_items:
+    #     order_item = OrderItem.objects.create(
+    #         order=order,
+    #         user=user,
+    #         payment=payment,
+    #         product=item.product,
+    #         quantity=item.quantity,
+    #         price=item.product.price,
+    #         is_ordered=True,
+    #     )
+        # order_item = OrderItem()
+        # order_item.order_id = order.id 
+        # order_item.user_id = user.id
+        # order_item.payment = payment
+        # order_item.quantity = item.quantity 
+        # order_item.price = item.product.price 
+        # order_item.product_id = item.product.id
+        # order_item.is_ordered = True      
+        # order_item.save()
 
         # copy variations (many-to-many)
         # cart_item = CartItem.objects.filter(id=item.id)
         # product_variation = cart_item.variations.all()
         # order_item = OrderItem.objects.filter(id=order_item.id)
         # order_item.variation.set(product_variation)
-        order_item.variation.set(item.variations.all())
+    #     order_item.variation.set(item.variations.all())
+    #     order_item.save()
 
-        # reduce stock
-        product = item.product
-        product.stock -= item.quantity
-        product.save()
+    #     # reduce stock
+    #     product = item.product
+    #     product.stock -= item.quantity
+    #     product.save()
 
-    cart_items.delete()
+    # cart_items.delete()
 
-    # Optional: order history
-    OrderHistory.objects.create(
-        user=user,
-        order=order,
-        order_status=True
-    )
+    # # Optional: order history
+    # OrderHistory.objects.create(
+    #     user=user,
+    #     order=order,
+    #     order_status=True
+    # )
 
     # Send confirmation email
     mail_subject = 'Thank you for your order!'
