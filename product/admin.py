@@ -32,7 +32,7 @@ class ProductAdmin(admin.ModelAdmin):
     thumbnail.short_description = 'Product Image'
     
     prepopulated_fields = {'slug':('product_name',)}
-    list_display = ('image', 'product_name', 'slug', 'category', 'promo', 'price', 'promo_price')
+    list_display = ('image', 'product_name', 'category', 'stock_level', 'promo', 'price', 'promo_price', 'modified_at', 'available')
     list_display_links = ['product_name']
     readonly_fields = ['created_at', 'modified_at']
     ordering = ['-modified_at']

@@ -34,7 +34,7 @@ class Order(models.Model):
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
     country = models.CharField(max_length=50)
-    order_note = models.TextField()
+    order_note = models.TextField( blank=True)
     order_total = models.FloatField()
     tax = models.FloatField()
     status = models.CharField(max_length=20, choices=STATUS, default='New')
@@ -63,11 +63,19 @@ class OrderItem(models.Model):
     # color = models.CharField(max_length=50)
     # size = models.CharField(max_length=50)
     quantity = models.IntegerField()
-    price = models.FloatField()
+    price = models.DecimalField(decimal_places=2, max_digits=7)
+    amount = models.DecimalField(decimal_places=2, max_digits=7)
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def subtotal(self):
+        # if self.product.promo:
+        #     return self.product.promo_price * self.quantity
+        # else:
+        #     return self.product.price * self.quantity
+        return self.price * self.quantity
+        
     def __str__(self):
         return self.product.product_name
 

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from cart.views import _cart_id
 from cart.models import Cart, CartItem
 from django.contrib.auth.decorators import login_required 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .forms import CreateOrderForm
 from .models import Order, Payment, OrderItem, OrderHistory
 import datetime
@@ -72,7 +72,7 @@ def create_order(request, total=0, quantity=0):
 
 
     if cart_item_count <= 0:
-        return redirect('product')
+        return redirect('products')
     
     else:
         if request.method == 'POST':
@@ -113,8 +113,11 @@ def create_order(request, total=0, quantity=0):
                     order_item.order_id = order.id 
                     order_item.user_id = request.user.id
                     # order_item.payment = payment
-                    order_item.quantity = item.quantity 
-                    order_item.price = item.product.price 
+                    order_item.quantity = item.quantity
+                    if item.product.promo:
+                        order_item.price = item.product.promo_price
+                    else: 
+                        order_item.price = item.product.price
                     order_item.product_id = item.product.id
                     # order_item.is_ordered = True      
                     order_item.save()
@@ -132,6 +135,15 @@ def create_order(request, total=0, quantity=0):
                 return render(request, 'payment/payments.html', context)
             else:
                 return redirect('checkout')
+
+# def payment_free(request):
+#     order 
+#     order_number
+#     payment_id
+#     order_item 
+
+#     context = {}
+#     return render(request, 'payment/order_complete.html', context)
 
 def payments(order_id, user_id, payment_id, payment_method, amount_paid, status):
     order = Order.objects.get(id=order_id, is_ordered=False)
@@ -156,13 +168,22 @@ def payments(order_id, user_id, payment_id, payment_method, amount_paid, status)
     # cart_items = CartItem.objects.filter(user=request.user)
 
     order_items = OrderItem.objects.filter(order=order)
-    print(order_items)
+    # print(order_items)
     for order_item in order_items:
         order_item.payment = payment
         order_item.is_ordered = True
         order_item.save()
     # print(order_items)
 
+        # reduce stock
+        product = Product.objects.get(id=order_item.product_id)     
+        product.stock_level -= order_item.quantity
+        product.save()
+
+    # delete cart items 
+        cart_items = CartItem.objects.filter(product=product, is_active=True)
+        print(cart_items)
+        cart_items.delete()
     # for item in cart_items:
     #     order_item = OrderItem.objects.create(
     #         order=order,
@@ -191,12 +212,8 @@ def payments(order_id, user_id, payment_id, payment_method, amount_paid, status)
     #     order_item.variation.set(item.variations.all())
     #     order_item.save()
 
-    #     # reduce stock
-    #     product = item.product
-    #     product.stock -= item.quantity
-    #     product.save()
-
-    # cart_items.delete()
+    #     
+    # 
 
     # # Optional: order history
     # OrderHistory.objects.create(
@@ -208,12 +225,30 @@ def payments(order_id, user_id, payment_id, payment_method, amount_paid, status)
     # Send confirmation email
     mail_subject = 'Thank you for your order!'
     message = render_to_string('payment/order_recieved_email.html', {
-        'user': order.user,
+        'user': user,
         'order': order,
     })
     EmailMessage(mail_subject, message, to=[order.user.email]).send()
 
-    return payment
+
+    
+    # return payment, order
+    return redirect('order_complete')
+
+def order_complete(request, order_number):
+    grand_total = 0
+    tax = 0
+    subtotal = 0
+    order = Order.objects.get(is_ordered=True, user=request.user, order_number=order_number)
+    order_number = order.order_number
+    payment = order.payment
+    payment_id = payment.payment_id
+    order_items = OrderItem.objects.filter(order_id=order.id, is_ordered=True)
+    for item in order_items:
+        subtotal += (item.price * item.quantity)
+
+    context={'order':order, 'order_items':order_items, 'subtotal':subtotal, 'payment_id':payment_id, 'order_number':order_number}
+    return render(request, 'payment/order_complete.html', context)
 
 def charge(request, total=0, quantity=0):
     cart_items = CartItem.objects.filter(user=request.user)
@@ -297,9 +332,42 @@ def paystack_checkout(request, order_id):
     
 @login_required(login_url='login')   
 def payment_success(request, order_id):
-    order = Order.objects.get(id=order_id)
-    context = {'order':order}
+    subtotal = 0
+    order = Order.objects.get(id=order_id, is_ordered=True)
+    payment = order.payment 
+    payment_id = payment.payment_id
+    # payment = Payment.objects.get(payment_id=payment_id)  -- also valid
+
+    order_items = OrderItem.objects.filter(order=order, payment=payment, is_ordered=True)
+    subtotal = 0
+    for order_item in order_items:
+        
+        # amount = order_item.price * order_item.quantity
+        unit_price = order_item.price
+        # if order_item.product.promo:
+            
+        #    order_item.amount = order_item.product.promo_price * order_item.quantity
+        # else:
+            
+        #    order_item.amount = order_item.product.price * order_item.quantity
+
+        order_item.amount = order_item.price * order_item.quantity
+        subtotal += order_item.amount
+        # order_item.save()
+        
+    context = {'order':order, 'order_items':order_items, 'payment_id':payment_id, 'payment':payment, 'unit_price':unit_price, 'subtotal':subtotal}
     return render(request, 'payment/payment_success.html', context)
+
+# subtotal = 0
+#     order = Order.objects.get(is_ordered=True, user=request.user, order_number=order_number)
+#     order_number = order.order_number
+#     payment = order.payment
+#     payment_id = payment.payment_id
+#     order_items = OrderItem.objects.filter(order_id=order.id, is_ordered=True)
+#     for item in order_items:
+#         subtotal += (item.price * item.quantity)
+
+#     context={'order':order, 'order_items':order_items, 'subtotal':subtotal, 'payment_id':payment_id, 'order_number':order_number}
 
 @login_required(login_url='login')
 def payment_failed(request, order_id):

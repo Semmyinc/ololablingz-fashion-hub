@@ -1,18 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <!-- <br><br><br><br><br><br><br><br>
-    <div class="container">
-        <p class="lead display-5 text-success text-center">Payment Successful for order {{order.first_name | capfirst}} | {{order.order_number}}</p>
-        <br><br><br>
-    </div> -->
-    {% load static %}
+
+{% load static %}
     <br><br><br><br><br><br><br>
     <div class="container">
         <div class="text-center">
             <i class="tick"></i>
             <p class="text-dark"><b>Payment Successful</b></p>
-            <a href="{% url 'products' %}" class="btn btn-success btn-small">Shop More</a>
+            <a href="" class="btn btn-success btn-small">Shop More</a>
         </div>
         <div class="card bg-light px-3 py-3 mx-auto" style="max-width: 720px; margin-top: 20px;">
             <article class="card-body">
@@ -27,18 +23,17 @@
                 </div>
 
                 <div class="row mb-4">
-                    <p class="mb-0 small text-start"><b>Order: </b>#{{order.order_number}}</p>
-                    <p class="mb-0 small text-start"><b>Transaction: </b>#{{payment_id}}</p>
-                    <p class="mb-0 small text-start"><b>Order Date: </b>{{order.created_at}}</p>
-                    <p class="mb-0 small text-start"><b>Status: </b>{{payment.status | capfirst}}</p>
+                    <p class="mb-0 small text-start"><b>Order: #{{order.order_number}}</b></p>
+                    <p class="mb-0 small text-start"><b>Transaction: #{{order.payment}}</b></p>
+                    <p class="mb-0 small text-start"><b>Order Date: {{order.created_at}}</b></p>
+                    <p class="mb-0 small text-start"><b>Status: {{order.status}}</b></p>
                 </div>
                 <div class="row mx-3">
                     <table class="table table-bordered border-muted">
                         <thead>
                             <tr class="row">
-                                <th scope="col" class="col-7 text-center small px-auto py-auto">Product Details</th>
+                                <th scope="col" class="col-9 text-center small px-auto py-auto">Product Details</th>
                                 <th scope="col" class="col-1 text-center small px-auto py-auto">Qty</th>
-                                <th scope="col" class="col-2 text-center small px-auto py-auto">Unit Price</th>
                                 <th scope="col" class="col-2 text-center small px-auto py-auto">Amount</th>
                             </tr>
                         </thead>
@@ -46,7 +41,7 @@
                             {% if order_items %}
                                 {% for order_item in order_items %}
                                     <tr class="row align-items-center">
-                                        <td class="col-7"><p class="card-text text-start small mb-0">{{order_item.product.product_name}}</p>
+                                        <td class="col-9"><p class="card-text text-start small mb-0">{{order_item.product.product_name}}</p>
                                             <p class="text-muted small mb-0">
                                                 {% if order_item.variation.all %}
                                                     {% for item in order_item.variation.all %}
@@ -56,14 +51,7 @@
                                             </p>
                                         </td>
                                         <td class="col-1"><p class="card-text text-center small">{{order_item.quantity}}</p></td>
-                                        <!-- {% if order_item.product.promo %} -->
-                                            <!-- <td class="col-2"><p class="card-text text-center small">&#8358 {{order_item.product.promo_price}}</p></td> -->
-                                           
-                                        <!-- {% else %} -->
-                                        <td class="col-2"><p class="card-text text-center small">&#8358 {{unit_price}}</p></td>
-                                            <!-- <td class="col-2"><p class="card-text text-center small">&#8358 #</p></td> -->
-                                        <!-- {% endif %} -->
-                                        <td class="col-2"><p class="card-text text-center small">&#8358 {{order_item.amount}}</p></td>
+                                        <td class="col-2"><p class="card-text text-center small">&#8358 {{order_item.price}}</p></td>
                                     </tr>
                                 {% endfor %}
                             {% endif %}
@@ -83,4 +71,4 @@
         </div>
     </div>
     <br><br><br>
-{% endblock %}
+{% endblock content %}

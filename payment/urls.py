@@ -13,4 +13,5 @@ urlpatterns = [
     path('stripe_checkout/<int:order_id>/', views.stripe_checkout, name='stripe_checkout'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),
     # https://unoverpowered-kayce-chidingly.ngrok-free.dev/stripe/webhook
+    path("order_complete/<str:order_number>", views.order_complete, name='order_complete'),
 ]
