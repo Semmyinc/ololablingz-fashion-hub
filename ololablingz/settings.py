@@ -28,9 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = fALSE
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['ololablingz-fashion-hub-4.onrender.com']
 
 CSRF_TRUSTED_ORIGINS = ['https://unoverpowered-kayce-chidingly.ngrok-free.dev',]
 # Application definition
