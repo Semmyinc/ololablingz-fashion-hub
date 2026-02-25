@@ -1,8 +1,11 @@
 from django.contrib import admin
-from .models import Category, Product, SimilarProduct, Variation
+from .models import Category, Product, SimilarProduct, Variation, AboutTeamMember, AboutPerson, AboutSiteHeader, Client
 from django.utils.html import format_html
 import admin_thumbnails
 # Register your models here.
+
+admin.site.site_header = 'Ololablingz Administration'
+# admin.site.site_title = 'Ololablingz'
 
 class CategoryAdmin(admin.ModelAdmin):
     def thumbnail(self, object):
@@ -53,3 +56,14 @@ class VariationAdmin(admin.ModelAdmin):
     list_filter = ('product', 'variation_category', 'variation_value')
                    
 admin.site.register(Variation, VariationAdmin)
+
+
+admin.site.register(AboutSiteHeader)
+admin.site.register(AboutPerson)
+admin.site.register(AboutTeamMember)
+
+class ClientAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'subject', 'message')
+    list_filter = ('name', 'email')
+
+admin.site.register(Client, ClientAdmin)

@@ -72,56 +72,92 @@ def login_user(request):
 
         user = authenticate(request, email=email, password=password)
         if user != None:
-            
+                    # if user is not None:
+            # 1. Get the guest cart items
             try:
-                cart = Cart.objects.get(cart_id=_cart_id(request))
-                does_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
-                if does_cart_item_exists:
-                    cart_items = CartItem.objects.filter(cart=cart)
-                    
-                    # getting the product variations by cart_id 
-                    product_variation = []
-                    for item in cart_items:
-                        variation = item.variations.all()
-                        product_variation.append(list(variation))
+                guest_cart = Cart.objects.get(cart_id=_cart_id(request))
+                guest_items = CartItem.objects.filter(cart=guest_cart)
+            except Cart.DoesNotExist:
+                guest_items = []
 
-                    # get the existing cart items from the user to access his product variations 
-                    cart_items = CartItem.objects.filter(user=user)
-                    ex_var_list = []
-                    id_list = []
-                    for item in cart_items:
-                        existing_variation = item.variations.all()
-                        ex_var_list.append(list(existing_variation))
-                        id_list.append(item.id)
+            # 2. Merge logic
+            if guest_items:
+                for g_item in guest_items:
+                    g_vars = list(g_item.variations.all())
                     
-                    # if product_variation in ex_var_list:
-                    #     index = ex_var_list.index(product_variation)
-                    #     item_id = id_list[index]
-                    #     item = CartItem.objects.get(id=item_id)
-                    #     item.quantity += 1
-                    #     item.user = user
-                    #     item.save()
+                    # Look for an identical item already belonging to the user
+                    user_item = CartItem.objects.filter(
+                        user=user, 
+                        product=g_item.product
+                    ).filter(variations__in=g_vars).distinct()
+
+                    # Filter further to ensure EXACT variation match (not just a subset)
+                    matched_item = None
+                    for u_item in user_item:
+                        if list(u_item.variations.all()) == g_vars:
+                            matched_item = u_item
+                            break
+
+                    if matched_item:
+                        # Match found: Update quantity and delete guest item
+                        matched_item.quantity += g_item.quantity
+                        matched_item.save()
+                        g_item.delete()
+                    else:
+                        # No match: Move guest item to user
+                        g_item.user = user
+                        g_item.cart = None
+                        g_item.save()
+
+            # try:
+            #     cart = Cart.objects.get(cart_id=_cart_id(request))
+            #     does_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+            #     if does_cart_item_exists:
+            #         cart_items = CartItem.objects.filter(cart=cart)
                     
-                    # else:
-                    #     cart_items = CartItem.objects.filter(cart=cart)
-                    #     for item in cart_items:
-                    #         item.user = user
-                    #         item.save()
-                    for pr in product_variation:
-                        if pr in ex_var_list:
-                            index = ex_var_list.index(pr)
-                            item_id = id_list[index]
-                            item = CartItem.objects.get(id=item_id)
-                            item.quantity += 1
-                            item.user = user
-                            item.save()
-                        else:
-                            cart_items = CartItem.objects.filter(cart=cart)
-                            for item in cart_items:
-                                item.user = user
-                            item.save()
-            except:
-                pass
+            #         # getting the product variations by cart_id 
+            #         product_variation = []
+            #         for item in cart_items:
+            #             variation = item.variations.all()
+            #             product_variation.append(list(variation))
+
+            #         # get the existing cart items from the user to access his product variations 
+            #         cart_items = CartItem.objects.filter(user=user)
+            #         ex_var_list = []
+            #         id_list = []
+            #         for item in cart_items:
+            #             existing_variation = item.variations.all()
+            #             ex_var_list.append(list(existing_variation))
+            #             id_list.append(item.id)
+                    
+            #         # if product_variation in ex_var_list:
+            #         #     index = ex_var_list.index(product_variation)
+            #         #     item_id = id_list[index]
+            #         #     item = CartItem.objects.get(id=item_id)
+            #         #     item.quantity += 1
+            #         #     item.user = user
+            #         #     item.save()
+                    
+            #         # else:
+            #         #     cart_items = CartItem.objects.filter(cart=cart)
+            #         #     for item in cart_items:
+            #         #         item.user = user
+            #         #         item.save()
+            #         for pr in product_variation:
+            #             if pr in ex_var_list:
+            #                 index = ex_var_list.index(pr)
+            #                 item_id = id_list[index]
+            #                 item = CartItem.objects.get(id=item_id)
+            #                 item.quantity += 1
+            #                 item.user = user
+            #                 item.save()
+            #             else:
+            #                 cart_items = CartItem.objects.filter(cart=cart)
+            #                 for item in cart_items:
+            #                     item.user = user
+            #                 item.save()
+            # except:
+            #     pass
 
             login(request, user)
             messages.success(request, f'Welcome! Glad to have you back')

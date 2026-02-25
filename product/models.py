@@ -78,3 +78,29 @@ class Variation(models.Model):
     
     objects = VariationManager()
 
+
+class AboutSiteHeader(models.Model):
+    image = models.ImageField(upload_to='uploads/about_header')
+
+DEPARTMENT = (
+    ('product', 'Product'),
+    ('marketing', 'Marketing'),
+    ('founder', 'Founder'),
+)
+class AboutPerson(models.Model):
+    name = models.CharField(max_length=50)
+    department = models.CharField(max_length=100, choices=DEPARTMENT)
+    image = models.ImageField(upload_to='uploads/about_person')
+
+
+class AboutTeamMember(models.Model):
+    name = models.CharField(max_length=50)
+    department = models.CharField(max_length=155)
+    image = models.ImageField(upload_to='uploads/about_person')
+
+
+class Client(models.Model):
+    name = models.CharField(max_length=50)
+    email = models.EmailField(max_length=50)
+    subject = models.CharField(max_length=50)
+    message = models.TextField()

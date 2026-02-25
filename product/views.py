@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from .models import Product, Category, SimilarProduct
+from .models import Product, Category, SimilarProduct, Client, AboutPerson, AboutSiteHeader, AboutTeamMember
 from cart.models import CartItem
 from cart.views import _cart_id
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -13,6 +13,24 @@ def home(request):
     # return HttpResponse('Home Page')
     context = {'products':products}
     return render(request, 'product/index.html', context)
+
+def about(request):
+    context = {}
+    return render(request, 'about.html', context)
+
+def contact(request):
+    if request.method == 'POST':
+        name = request.POST['name']
+        email = request.POST['email']
+        subject = request.POST['subject']
+        message = request.POST['message']
+
+        client = Client.objects.create(name=name, email=email, subject=subject, message=message)
+        messages.success(request, 'Your message has been sent successfully!')
+        return redirect('contact')
+    
+    context = {}
+    return render(request, 'contact.html', context)
 
 def products(request, category_slug=None):
     # fetch all products under a category 
@@ -56,11 +74,13 @@ def product_detail(request, category_slug, product_slug):
 
 
 def search(request):
+    searched_items = None
     if request.method == 'POST':
         search = request.POST['search']
         searched_items = Product.objects.filter(Q(product_name__icontains=search)|
-                                          Q(slug__icontains=search)|
-                                        #   Q(category__icontains=search)|
+                                          
+                                          Q(category__category_name__icontains=search)|
+                                          Q(category__description__icontains=search)|
                                           Q(description__icontains=search)|
                                           Q(promo__icontains=search)|
                                           Q(available__icontains=search))

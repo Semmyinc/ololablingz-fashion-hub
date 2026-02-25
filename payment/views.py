@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from cart.views import _cart_id
 from cart.models import Cart, CartItem
 from django.contrib.auth.decorators import login_required 
@@ -12,6 +12,7 @@ from django.contrib import messages
 from product.models import Product
 from users.models import Users
 # from .models import OrderHistory
+
 # for paystack set-up
 import uuid
 from django.urls import reverse
@@ -76,7 +77,7 @@ def create_order(request, total=0, quantity=0):
     
     else:
         if request.method == 'POST':
-            form = CreateOrderForm(request.POST or None)
+            form = CreateOrderForm(request.POST)
             if form.is_valid():
                 data = Order()
                 data.user = request.user
@@ -103,50 +104,58 @@ def create_order(request, total=0, quantity=0):
                 current_date = d.strftime("%Y%m%d")
                 order_number = f'{current_date}{str(data.id)}'
                 data.order_number = order_number
-                data.save()
-
+                
+                data.save() # Final save for order_number
+                
+                # Get the order object we just created
                 order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=False)
 
-                # cart_item = CartItem.objects.get(user=request.user)
                 for item in cart_items:
                     order_item = OrderItem()
                     order_item.order_id = order.id 
                     order_item.user_id = request.user.id
-                    # order_item.payment = payment
-                    order_item.quantity = item.quantity
-                    if item.product.promo:
-                        order_item.price = item.product.promo_price
-                    else: 
-                        order_item.price = item.product.price
                     order_item.product_id = item.product.id
-                    # order_item.is_ordered = True      
+                    order_item.quantity = item.quantity
+                    
+                    unit_price = item.product.promo_price if item.product.promo else item.product.price
+                    order_item.price = unit_price
+                    order_item.amount = unit_price * item.quantity
+                    
                     order_item.save()
-
-                    # copy variations (many-to-many)
-                    # cart_item = CartItem.objects.get(id=item.id)
-                    # product_variation = cart_item.variations.all()
-                    # order_item = OrderItem.objects.get(id=order_item.id)
-                    # order_item.variation.set(product_variation)
                     order_item.variation.set(item.variations.all())
-                    order_item.save()
 
-                context = {'order':order, 'tax':tax, 'total':total, 'grand_total':grand_total, 'cart_items':cart_items}
-                # return redirect('checkout')
+                # delete cart_items after creating order 
+                cart_items.delete()
+
+                # MOVE THIS INSIDE THE VALID BLOCK
+                context = {
+                    'order': order, 
+                    'tax': tax, 
+                    'total': total, 
+                    'grand_total': grand_total, 
+                    'cart_items': cart_items
+                }
                 return render(request, 'payment/payments.html', context)
+            
             else:
+                # If form is NOT valid, print errors to terminal to see what's wrong
+                print(form.errors)
+                # Redirect back but maybe add a message so you know it failed
                 return redirect('checkout')
-
-# def payment_free(request):
-#     order 
-#     order_number
-#     payment_id
-#     order_item 
-
-#     context = {}
-#     return render(request, 'payment/order_complete.html', context)
+        
+        # If it's a GET request, just go back to checkout
+        return redirect('checkout')
+    
 
 def payments(order_id, user_id, payment_id, payment_method, amount_paid, status):
-    order = Order.objects.get(id=order_id, is_ordered=False)
+ 
+    try:
+        order = Order.objects.get(id=order_id)
+        if order.is_ordered:
+            return # Already processed, stop here safely
+    except Order.DoesNotExist:
+        return
+
     user = Users.objects.get(id=user_id)
 
     # Prevent duplicate processing
@@ -181,46 +190,8 @@ def payments(order_id, user_id, payment_id, payment_method, amount_paid, status)
         product.save()
 
     # delete cart items 
-        cart_items = CartItem.objects.filter(product=product, is_active=True)
-        print(cart_items)
-        cart_items.delete()
-    # for item in cart_items:
-    #     order_item = OrderItem.objects.create(
-    #         order=order,
-    #         user=user,
-    #         payment=payment,
-    #         product=item.product,
-    #         quantity=item.quantity,
-    #         price=item.product.price,
-    #         is_ordered=True,
-    #     )
-        # order_item = OrderItem()
-        # order_item.order_id = order.id 
-        # order_item.user_id = user.id
-        # order_item.payment = payment
-        # order_item.quantity = item.quantity 
-        # order_item.price = item.product.price 
-        # order_item.product_id = item.product.id
-        # order_item.is_ordered = True      
-        # order_item.save()
-
-        # copy variations (many-to-many)
-        # cart_item = CartItem.objects.filter(id=item.id)
-        # product_variation = cart_item.variations.all()
-        # order_item = OrderItem.objects.filter(id=order_item.id)
-        # order_item.variation.set(product_variation)
-    #     order_item.variation.set(item.variations.all())
-    #     order_item.save()
-
-    #     
-    # 
-
-    # # Optional: order history
-    # OrderHistory.objects.create(
-    #     user=user,
-    #     order=order,
-    #     order_status=True
-    # )
+        # Inside the loop:
+        CartItem.objects.filter(user=user, product=product).delete()
 
     # Send confirmation email
     mail_subject = 'Thank you for your order!'
@@ -233,7 +204,8 @@ def payments(order_id, user_id, payment_id, payment_method, amount_paid, status)
 
     
     # return payment, order
-    return redirect('order_complete')
+    # return redirect('order_complete')
+    return True
 
 def order_complete(request, order_number):
     grand_total = 0
@@ -276,98 +248,160 @@ def charge(request, total=0, quantity=0):
     return render(request, 'payment/charge.html', context)
 
 
-def paystack_payment_verify(request, order_id):
-    pass
+# @login_required(login_url='login')
+# def paystack_checkout(request, order_id):
 #     order = Order.objects.get(id=order_id)
-#     reference = request.GET.get('reference', '')
-#     if reference:
-#         headers = {
-#             'Authorization':f'Bearer {settings.PAYSTACK_SECRET_KEY}',
-#             'Content_Type':'Application/json'
-#         }
+#     # product = Product.objects.get(id=product_id)
+#     purchase_id = f"purchase_{uuid.uuid4()}"
+#     order_number = order.order_number
 
-#         response = requests.get(f'https://api.paystack.co/transaction/verify/{reference}', headers=headers)
-#         response_data = response.json()
+#     # /payment-success/2/
+#     payment_success_url = reverse('payment_success', kwargs={'order_id': order_id})
+#     # http://domain.com/payment-success/2/ 
+#     callback_url = f"{request.scheme}://{request.get_host()}{payment_success_url}"
 
-#         if response.data['status']:
-#             if response.data['data']['status'] == 'success':
+#     checkout_data = {
+#         "email": request.user.email,
+#         "amount": (order.order_total) * 100,  # in kobo (₦2500)
+#         "currency": "NGN",
+#         "channels": ["card", "bank_transfer", "bank", "ussd", "qr", "mobile_money"],
+#         "reference": purchase_id, # generated by developer
+#         "callback_url": callback_url,
+#         "metadata": {
+#             "order_id": order_id,
+#             "user_id": request.user.id,
+#             "purchase_id": purchase_id,
+#             'order_number': order_number
+#         },
+#         # "label": f"Checkout For {order.first_name} {order.last_name}"
+#         "label": f"Checkout For {order.full_name}"
+#     }
 
+#     status, check_out_session_url_or_error_message = check_out(checkout_data)
+
+#     if status:
+#         return redirect(check_out_session_url_or_error_message)
+#     else:
+#         print(f"Paystack Error: {check_out_session_url_or_error_message}") # Check terminal
+#         messages.error(request, check_out_session_url_or_error_message)
+#         return redirect('create_order')
 
 @login_required(login_url='login')
 def paystack_checkout(request, order_id):
-    order = Order.objects.get(id=order_id)
-    # product = Product.objects.get(id=product_id)
+    order = get_object_or_404(Order, id=order_id)
     purchase_id = f"purchase_{uuid.uuid4()}"
-    order_number = order.order_number
+    
+    # FIX: Ensure amount is a plain integer
+    amount_in_kobo = int(float(order.order_total) * 100)
 
-    # /payment-success/2/
     payment_success_url = reverse('payment_success', kwargs={'order_id': order_id})
-    # http://domain.com/payment-success/2/ 
+    # If on localhost, Paystack sometimes rejects 127.0.0.1. 
+    # Use your actual local IP or a service like Ngrok for testing webhooks.
     callback_url = f"{request.scheme}://{request.get_host()}{payment_success_url}"
 
     checkout_data = {
         "email": request.user.email,
-        "amount": (order.order_total) * 100,  # in kobo (₦2500)
+        "amount": amount_in_kobo, 
         "currency": "NGN",
-        "channels": ["card", "bank_transfer", "bank", "ussd", "qr", "mobile_money"],
-        "reference": purchase_id, # generated by developer
+        "reference": purchase_id,
         "callback_url": callback_url,
         "metadata": {
             "order_id": order_id,
             "user_id": request.user.id,
-            "purchase_id": purchase_id,
-            'order_number': order_number
         },
-        # "label": f"Checkout For {order.first_name} {order.last_name}"
-        "label": f"Checkout For {order.full_name}"
+        "label": f"Checkout For {order.first_name}"
     }
 
-    status, check_out_session_url_or_error_message = check_out(checkout_data)
+    status, response_data = check_out(checkout_data)
 
     if status:
-        return redirect(check_out_session_url_or_error_message)
+        return redirect(response_data)
     else:
-        messages.error(request, check_out_session_url_or_error_message)
-        return redirect('create_order')
+        # CRITICAL DEBUG: This will tell you EXACTLY why Paystack failed in your terminal
+        print(f"PAYSTACK ERROR LOG: {response_data}")
+        messages.error(request, f"Paystack Error: {response_data}")
+        return redirect('checkout') # Redirect back to checkout to try again
+
     
+# @login_required(login_url='login')   
+# def payment_success(request, order_id):
+#     subtotal = 0
+#     unit_price = 0  # <--- FIX: Initialize it here
+#     # order = Order.objects.get(id=order_id, is_ordered=True)
+#     # Change this to get the order regardless of status first, then check
+#     order = get_object_or_404(Order, id=order_id)
+#     # If the webhook hasn't updated it yet, you might need to handle that
+#     if not order.is_ordered:
+#         # Option A: Force update if we trust the redirect
+#         # order.is_ordered = True 
+#         # order.save()
+#         pass
+
+#     # Ensure payment exists before accessing it to avoid RelatedObjectDoesNotExist
+#     # payment = order.payment 
+#     # payment_id = payment.payment_id
+#         payment = getattr(order, 'payment', None)
+#         payment_id = payment.payment_id if payment else "Processing..."
+#         # payment = Payment.objects.get(payment_id=payment_id)  -- also valid
+
+#         order_items = OrderItem.objects.filter(order=order, payment=payment, is_ordered=True)
+#         # subtotal = 0
+#         for order_item in order_items:
+            
+#             # amount = order_item.price * order_item.quantity
+#             unit_price = order_item.price
+#             # if order_item.product.promo:
+                
+#             #    order_item.amount = order_item.product.promo_price * order_item.quantity
+#             # else:
+                
+#             #    order_item.amount = order_item.product.price * order_item.quantity
+
+#             order_item.amount = order_item.price * order_item.quantity
+#             subtotal += order_item.amount
+#             order_item.save()
+            
+#     context = {'order':order, 'order_items':order_items, 'payment_id':payment_id, 'payment':payment, 'unit_price':unit_price, 'subtotal':subtotal}
+#     return render(request, 'payment/payment_success.html', context)
+
+
 @login_required(login_url='login')   
 def payment_success(request, order_id):
+    # Initialize variables to prevent UnboundLocalError
     subtotal = 0
-    order = Order.objects.get(id=order_id, is_ordered=True)
-    payment = order.payment 
-    payment_id = payment.payment_id
-    # payment = Payment.objects.get(payment_id=payment_id)  -- also valid
+    unit_price = 0 
+    
+    # DO NOT filter by is_ordered=True here. 
+    # The user might arrive before the webhook finishes.
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Safely get payment details
+    payment = getattr(order, 'payment', None)
+    payment_id = payment.payment_id if payment else "Processing..."
 
-    order_items = OrderItem.objects.filter(order=order, payment=payment, is_ordered=True)
-    subtotal = 0
+    order_items = OrderItem.objects.filter(order=order)
+    
     for order_item in order_items:
+        # Use existing amount or calculate it
+        # item_total = order_item.price * order_item.quantity
+        # subtotal += item_total
+        # If the database field 'amount' is 0 or None, calculate it manually for the template
+        if not order_item.amount:
+            order_item.amount = order_item.price * order_item.quantity
         
-        # amount = order_item.price * order_item.quantity
-        unit_price = order_item.price
-        # if order_item.product.promo:
-            
-        #    order_item.amount = order_item.product.promo_price * order_item.quantity
-        # else:
-            
-        #    order_item.amount = order_item.product.price * order_item.quantity
-
-        order_item.amount = order_item.price * order_item.quantity
         subtotal += order_item.amount
-        # order_item.save()
-        
-    context = {'order':order, 'order_items':order_items, 'payment_id':payment_id, 'payment':payment, 'unit_price':unit_price, 'subtotal':subtotal}
+        unit_price = order_item.price 
+
+    context = {
+        'order': order, 
+        'order_items': order_items, 
+        'payment_id': payment_id, 
+        'payment': payment, 
+        'unit_price': unit_price, 
+        'subtotal': subtotal
+    }
     return render(request, 'payment/payment_success.html', context)
 
-# subtotal = 0
-#     order = Order.objects.get(is_ordered=True, user=request.user, order_number=order_number)
-#     order_number = order.order_number
-#     payment = order.payment
-#     payment_id = payment.payment_id
-#     order_items = OrderItem.objects.filter(order_id=order.id, is_ordered=True)
-#     for item in order_items:
-#         subtotal += (item.price * item.quantity)
-
-#     context={'order':order, 'order_items':order_items, 'subtotal':subtotal, 'payment_id':payment_id, 'order_number':order_number}
 
 @login_required(login_url='login')
 def payment_failed(request, order_id):
@@ -407,121 +441,6 @@ def paystack_webhook(request):
 
     return HttpResponse(status=200)
 
-# def process_paystack_payment(
-#     order_id,
-#     user_id,
-#     payment_id,
-#     payment_method,
-#     amount_paid,
-#     status
-# ):
-#     order = Order.objects.get(id=order_id, is_ordered=False)
-#     user = Users.objects.get(id=user_id)
-
-#     # Prevent duplicate processing
-#     if Payment.objects.filter(payment_id=payment_id).exists():
-#         return
-
-#     payment = Payment.objects.create(
-#         user=user,
-#         payment_id=payment_id,
-#         payment_method=payment_method,
-#         amount_paid=amount_paid,
-#         status=status,
-#     )
-
-#     order.payment = payment
-#     order.is_ordered = True
-#     order.save()
-
-#     cart_items = CartItem.objects.filter(user=user)
-
-#     for item in cart_items:
-#         order_item = OrderItem.objects.create(
-#             order=order,
-#             user=user,
-#             payment=payment,
-#             product=item.product,
-#             quantity=item.quantity,
-#             price=item.product.price,
-#             is_ordered=True,
-#         )
-
-#         # copy variations (many-to-many)
-#         order_item.variations.set(item.variations.all())
-
-#         # reduce stock
-#         product = item.product
-#         product.stock -= item.quantity
-#         product.save()
-
-#     cart_items.delete()
-
-#     # Optional: order history
-#     OrderHistory.objects.create(
-#         user=user,
-#         order=order,
-#         order_status=True
-#     )
-    #     if webhook_post_data["event"] == "charge.success":
-    #         payment_id = webhook_post_data['data']['id']
-    #         payment_status = webhook_post_data['data']['status']
-    #         payment_method = webhook_post_data['data']['channel']
-    #         amount_paid = (webhook_post_data['data']['amount'])/100
-
-    #         metadata = webhook_post_data["data"]["metadata"]
-
-    #         order_id = metadata["order_id"]
-    #         user_id = metadata["user_id"]
-    #         purchase_id = metadata["purchase_id"]
-
-    #         user = Users.objects.get(id=user_id)
-
-    #         OrderHistory.objects.create(
-    #             purchase_id = purchase_id,
-    #             user = user,
-    #             order_status = True,
-    #             order = Order.objects.get(id=order_id)
-    #         )
-
-    #         # Payment.objects.create(
-    #         #     user = user,
-    #         #     payment_id = payment_id, 
-    #         #     payment_method = payment_method,
-    #         #     amount_paid = amount_paid,
-    #         #     status = payment_status,
-    #         # )
-
-    #         # send mail to user or perfrom extra processing
-
-    #         order = Order.objects.get(id=order_id)
-    #         payment = Payment(user = user,
-    #             payment_id = payment_id, 
-    #             payment_method = payment_method,
-    #             amount_paid = amount_paid,
-    #             status = payment_status,)
-
-    #         payment.save()
-    #         order.payment = payment
-    #         order.is_ordered = True
-    #         order.save()
-
-    #         # move cart_items to order_items table 
-    #         cart_items = CartItem.objects.filter(user=request.user)
-    #         for item in cart_items:
-    #             orderitem = OrderItem()
-    #             orderitem.order_id = order.id
-    #             orderitem.user_id = request.user.id
-    #             orderitem.payment = payment
-    #             orderitem.product_id = item.product_id
-    #             orderitem.quantity = item.quantity
-    #             orderitem.price = item.product.price
-    #             orderitem.is_ordered = True
-    #             # variations can not be assigned directly as it is many to many field 
-    #             orderitem.save()
-
-    # return HttpResponse(status=200)    
-
 
 
 # lets accept payment using stripe 
@@ -557,12 +476,6 @@ def stripe_checkout(request, order_id):
             'user_id':request.user.id,
             'purchase_id':purchase_id,
             'order_number':order_number
-            # user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    # payment_id = models.CharField(max_length=100)
-    # Payment_method = models.CharField(max_length=100)
-    # # amount_paid = models.CharField(max_length=100) - amount_paid = order.order_total
-    # status = models.CharField(max_length=100) - 'status':payment_status
-    # created_at = models.DateTimeField(auto_now_add=True)
         },
         mode='payment',
 
@@ -630,7 +543,17 @@ def stripe_webhook(request):
         except Exception as e:
             return HttpResponse(status=500)
 
-        # payment_id = session['id']
+    
+    else:
+        # print(Unhandled event type {}.format(event['type']))
+        print(f"Unhandled {event['type']}")
+    
+    return  HttpResponse(status=200)
+
+
+
+
+# payment_id = session['id']
         # payment_method = session['payment_method_types']
         # amount_paid = int(session['amount_total'])/100
         # status = session['payment_status']
@@ -653,13 +576,6 @@ def stripe_webhook(request):
         #     amount_paid = amount_paid,
         #     status = status,
         # )
-    else:
-        # print(Unhandled event type {}.format(event['type']))
-        print(f"Unhandled {event['type']}")
-    
-    return  HttpResponse(status=200)
-
-
 
 
 
@@ -831,3 +747,246 @@ def stripe_webhook(request):
 
 # how order number reaches webhook 
 # Webhook → order_number → Order object
+
+
+
+# else:
+    #     if request.method == 'POST':
+    #         form = CreateOrderForm(request.POST or None)
+    #         if form.is_valid():
+    #             data = Order()
+    #             data.user = request.user
+    #             data.first_name = form.cleaned_data['first_name']
+    #             data.last_name = form.cleaned_data['last_name']
+    #             data.phone = form.cleaned_data['phone']
+    #             data.email = form.cleaned_data['email']
+    #             data.address = form.cleaned_data['address']
+    #             data.city = form.cleaned_data['city']
+    #             data.state = form.cleaned_data['state']
+    #             data.country = form.cleaned_data['country']
+    #             data.order_note = form.cleaned_data['order_note']
+    #             data.tax = tax
+    #             data.order_total = grand_total
+    #             data.ip = request.META.get('REMOTE_ADDR') #to generate user's ip address 
+    #             data.save()
+                
+    #             #generate order code
+    #             yr = int(datetime.date.today().strftime('%Y'))
+    #             m  = int(datetime.date.today().strftime('%m'))
+    #             dt = int(datetime.date.today().strftime('%d'))
+
+    #             d = datetime.date(yr,m,dt)
+    #             current_date = d.strftime("%Y%m%d")
+    #             order_number = f'{current_date}{str(data.id)}'
+    #             data.order_number = order_number
+    #             data.save()
+
+    #             order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=False)
+
+    #             for item in cart_items:
+    #                 order_item = OrderItem()
+    #                 order_item.order_id = order.id 
+    #                 order_item.user_id = request.user.id
+    #                 order_item.product_id = item.product.id
+    #                 order_item.quantity = item.quantity
+                    
+    #                 # 1. Determine the unit price
+    #                 if item.product.promo:
+    #                     unit_price = item.product.promo_price
+    #                 else: 
+    #                     unit_price = item.product.price
+                    
+    #                 # 2. Assign BOTH fields required by your model
+    #                 order_item.price = unit_price
+    #                 order_item.amount = unit_price * item.quantity  # This satisfies the NOT NULL amount constraint
+                    
+    #                 order_item.save()  # This will now succeed
+
+    #                 # 3. Add variations
+    #                 order_item.variation.set(item.variations.all())
+
+
+    #         context = {'order':order, 'tax':tax, 'total':total, 'grand_total':grand_total, 'cart_items':cart_items}
+    #         # return redirect('checkout')
+    #         return render(request, 'payment/payments.html', context)
+    #     else:
+    #         return redirect('checkout')
+
+# def payment_free(request):
+#     order 
+#     order_number
+#     payment_id
+#     order_item 
+
+#     context = {}
+#     return render(request, 'payment/order_complete.html', context)
+
+def paystack_payment_verify(request, order_id):
+    pass
+#     order = Order.objects.get(id=order_id)
+#     reference = request.GET.get('reference', '')
+#     if reference:
+#         headers = {
+#             'Authorization':f'Bearer {settings.PAYSTACK_SECRET_KEY}',
+#             'Content_Type':'Application/json'
+#         }
+
+#         response = requests.get(f'https://api.paystack.co/transaction/verify/{reference}', headers=headers)
+#         response_data = response.json()
+
+#         if response.data['status']:
+#             if response.data['data']['status'] == 'success':
+
+
+# def process_paystack_payment(
+#     order_id,
+#     user_id,
+#     payment_id,
+#     payment_method,
+#     amount_paid,
+#     status
+# ):
+#     order = Order.objects.get(id=order_id, is_ordered=False)
+#     user = Users.objects.get(id=user_id)
+
+#     # Prevent duplicate processing
+#     if Payment.objects.filter(payment_id=payment_id).exists():
+#         return
+
+#     payment = Payment.objects.create(
+#         user=user,
+#         payment_id=payment_id,
+#         payment_method=payment_method,
+#         amount_paid=amount_paid,
+#         status=status,
+#     )
+
+#     order.payment = payment
+#     order.is_ordered = True
+#     order.save()
+
+#     cart_items = CartItem.objects.filter(user=user)
+
+#     for item in cart_items:
+#         order_item = OrderItem.objects.create(
+#             order=order,
+#             user=user,
+#             payment=payment,
+#             product=item.product,
+#             quantity=item.quantity,
+#             price=item.product.price,
+#             is_ordered=True,
+#         )
+
+#         # copy variations (many-to-many)
+#         order_item.variations.set(item.variations.all())
+
+#         # reduce stock
+#         product = item.product
+#         product.stock -= item.quantity
+#         product.save()
+
+#     cart_items.delete()
+
+#     # Optional: order history
+#     OrderHistory.objects.create(
+#         user=user,
+#         order=order,
+#         order_status=True
+#     )
+    #     if webhook_post_data["event"] == "charge.success":
+    #         payment_id = webhook_post_data['data']['id']
+    #         payment_status = webhook_post_data['data']['status']
+    #         payment_method = webhook_post_data['data']['channel']
+    #         amount_paid = (webhook_post_data['data']['amount'])/100
+
+    #         metadata = webhook_post_data["data"]["metadata"]
+
+    #         order_id = metadata["order_id"]
+    #         user_id = metadata["user_id"]
+    #         purchase_id = metadata["purchase_id"]
+
+    #         user = Users.objects.get(id=user_id)
+
+    #         OrderHistory.objects.create(
+    #             purchase_id = purchase_id,
+    #             user = user,
+    #             order_status = True,
+    #             order = Order.objects.get(id=order_id)
+    #         )
+
+    #         # Payment.objects.create(
+    #         #     user = user,
+    #         #     payment_id = payment_id, 
+    #         #     payment_method = payment_method,
+    #         #     amount_paid = amount_paid,
+    #         #     status = payment_status,
+    #         # )
+
+    #         # send mail to user or perfrom extra processing
+
+    #         order = Order.objects.get(id=order_id)
+    #         payment = Payment(user = user,
+    #             payment_id = payment_id, 
+    #             payment_method = payment_method,
+    #             amount_paid = amount_paid,
+    #             status = payment_status,)
+
+    #         payment.save()
+    #         order.payment = payment
+    #         order.is_ordered = True
+    #         order.save()
+
+    #         # move cart_items to order_items table 
+    #         cart_items = CartItem.objects.filter(user=request.user)
+    #         for item in cart_items:
+    #             orderitem = OrderItem()
+    #             orderitem.order_id = order.id
+    #             orderitem.user_id = request.user.id
+    #             orderitem.payment = payment
+    #             orderitem.product_id = item.product_id
+    #             orderitem.quantity = item.quantity
+    #             orderitem.price = item.product.price
+    #             orderitem.is_ordered = True
+    #             # variations can not be assigned directly as it is many to many field 
+    #             orderitem.save()
+
+    # return HttpResponse(status=200)  
+
+    # for item in cart_items:
+    #     order_item = OrderItem.objects.create(
+    #         order=order,
+    #         user=user,
+    #         payment=payment,
+    #         product=item.product,
+    #         quantity=item.quantity,
+    #         price=item.product.price,
+    #         is_ordered=True,
+    #     )
+        # order_item = OrderItem()
+        # order_item.order_id = order.id 
+        # order_item.user_id = user.id
+        # order_item.payment = payment
+        # order_item.quantity = item.quantity 
+        # order_item.price = item.product.price 
+        # order_item.product_id = item.product.id
+        # order_item.is_ordered = True      
+        # order_item.save()
+
+        # copy variations (many-to-many)
+        # cart_item = CartItem.objects.filter(id=item.id)
+        # product_variation = cart_item.variations.all()
+        # order_item = OrderItem.objects.filter(id=order_item.id)
+        # order_item.variation.set(product_variation)
+    #     order_item.variation.set(item.variations.all())
+    #     order_item.save()
+
+    #     
+    # 
+
+    # # Optional: order history
+    # OrderHistory.objects.create(
+    #     user=user,
+    #     order=order,
+    #     order_status=True
+    # )

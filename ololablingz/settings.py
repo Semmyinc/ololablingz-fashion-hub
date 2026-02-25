@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from decouple import config
-from environ import Env
+from environs import Env
 
 env = Env()
 env.read_env()
@@ -30,7 +30,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = []
 
 CSRF_TRUSTED_ORIGINS = ['https://unoverpowered-kayce-chidingly.ngrok-free.dev',]
 # Application definition
