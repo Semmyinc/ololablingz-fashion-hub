@@ -141,11 +141,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # STORAGES = {
 #     'staticfiles':{
-#         'BACKEND': 'whitenoise.storage.ComppressedManifestStaticFilesStorage',
+#         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
 #     },
 # }
 
-STATICFILES_STORAGE = 'whitenoise.storage.ComppressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # media files set up 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
