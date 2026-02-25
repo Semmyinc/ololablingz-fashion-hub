@@ -30,7 +30,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ololablingz-fashion-hub-4.onrender.com']
+ALLOWED_HOSTS = ['ololablingz-fashion-hub.onrender.com']
 
 CSRF_TRUSTED_ORIGINS = ['https://unoverpowered-kayce-chidingly.ngrok-free.dev',]
 # Application definition
