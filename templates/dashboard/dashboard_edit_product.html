@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<br><br><br><br>
+<!-- Add Google Fonts and Bootstrap Icons for a modern look -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net">
+
+<style>
+    .bg-light-soft { background-color: #f8f9fa; }
+    .card { border: none; border-radius: 12px; transition: transform 0.2s; }
+    .side-link { border: none; border-radius: 8px !important; margin-bottom: 5px; color: #495057; }
+    .side-link.active { background-color: #0d6efd !important; color: white !important; }
+    .order-card { border: 1px solid #edf2f7; }
+    .status-badge { font-size: 0.75rem; padding: 5px 12px; border-radius: 50px; }
+    .product-img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
+</style>
+
+<section class="section-content padding-y-sm bg-light-soft min-vh-100">
+    <div class="container py-5">
+        
+        <!-- Flash Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{message.tags}} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> {{message}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Sidebar Navigation -->
+             {% include 'dashboard/sidebar.html' %}
+
+            
+            <!-- Main Content Area -->
+            <main class="col-lg-9">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold">Update Product Details</h5>
+                            <!-- <span class="badge bg-primary-soft text-primary">Add Product</span> -->
+                             <!-- <a href="{% url 'dashboard_add_user' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3"><i class="bi bi-person-fill me-2"></i>&nbsp;Add User</a> -->
+                        </div>
+                    </div>
+
+                    <!-- Order Item -->
+                    <div class="card-body border-top">
+                        <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        
+                        <h6 class="text-uppercase fw-bold text-muted small mb-3">Identity & Credentials</h6>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Product Name</label>
+                                {{ form.product_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Category</label>
+                                {{ form.category }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Product Summary</label>
+                                {{ form.description }}
+                            </div>
+                            
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Promo</label>
+                                {{ form.promo }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Price</label>
+                                {{ form.price }}
+                            </div> 
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Promo Price</label>
+                                {{ form.promo_price }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Promo</label>
+                                {{ form.promo }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Price</label>
+                                {{ form.price }}
+                            </div> 
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Promo Price</label>
+                                {{ form.promo_price }}
+                            </div>
+                        </div>
+
+
+                        
+                        <!-- Account Status Switches -->
+                        <h6 class="text-uppercase fw-bold text-muted small mb-3">Account Status</h6>
+                        <div class="row mb-5 g-3">
+                            <div class="col-md-4">
+                                <div class="permission-box text-center">
+                                    <label class="d-block small fw-bold mb-2">Active</label>
+                                    {{ form.available }}
+                                </div>
+                            </div>
+                            <!-- <div class="col-md-3">
+                                <div class="permission-box text-center">
+                                    <label class="d-block small fw-bold mb-2">Admin</label>
+                                    {{ form.is_admin }}
+                                </div>
+                            </div> -->
+                            <div class="col-md-4">
+                                <div class="permission-box text-center">
+                                    <label class="d-block small fw-bold mb-2">Staff</label>
+                                    {{ form.stock_level }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="permission-box text-center">
+                                    <label class="d-block small fw-bold mb-2">Superuser</label>
+                                    {{ form.image }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-4 border-top">
+                            <a href="{% url 'dashboard_users' %}" class="btn btn-secondary px-4 me-3">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">Confirm & Save Changes</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+
+ 

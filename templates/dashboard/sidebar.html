@@ -1,0 +1,38 @@
+<aside class="col-lg-3 mb-4">
+                <div class="card shadow-sm p-3">
+                    <div class="card-body p-2">
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3 px-3">Account Menu</h6>
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'dashboard' %}" class=" list-group-item list-group-item-action side-link {% if request.path == '/dashboard/' %}active{% endif %}">
+                                <i class="bi bi-speedometer2 me-2"></i> My Dashboard
+                            </a>
+                            {% if user.is_superuser or user.is_staff %}
+                            <a href="{% url 'dashboard_products' %}" class="list-group-item list-group-item-action side-link {% if 'dashboard_products' in request.path %}active{% endif %}">
+                                <i class="bi bi-bag-check me-2"></i> Products
+                            </a>
+                            <a href="{% url 'dashboard_categories' %}" class="list-group-item list-group-item-action side-link {% if 'dashboard_categories' in request.path %}active{% endif %}">
+                                <i class="bi bi-layers me-2"></i> Categories
+                            </a>
+                            <a href="{% url 'dashboard_users' %}" class="list-group-item list-group-item-action side-link {% if 'dashboard_users' in request.path %}active{% endif %}">
+                                <i class="bi bi-people me-2"></i> Users
+                            </a>
+                            {% endif %}
+                             <a href="{% url 'orderhistory' %}" class="list-group-item list-group-item-action side-link {% if 'orderhistory' in request.path %}active{% endif %}">
+                                <i class="bi bi-bag-check me-2"></i> Order History
+                            </a>
+                            <a href="{% url 'receivedorders' %}" class="list-group-item list-group-item-action side-link {% if 'receivedorders' in request.path %}active{% endif %}">
+                                <i class="bi bi-box-seam me-2"></i> Received Orders
+                            </a>
+                            <a href="{% url 'transactions' %}" class="list-group-item list-group-item-action side-link {% if 'trasactions' in request.path %}active{% endif %}">
+                                <i class="bi bi-credit-card me-2"></i> Transactions
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action side-link text-muted">
+                                <i class="bi bi-gear me-2"></i> Settings
+                            </a>
+                            <a href="{% url 'logout' %}" class="list-group-item list-group-item-action side-link text-muted">
+                                <i class="bi bi-box-arrow-right me-2"></i> Log Out
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </aside>

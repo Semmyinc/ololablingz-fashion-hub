@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br><br><br><br>
+<!-- Add Google Fonts and Bootstrap Icons for a modern look -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net">
+
+<style>
+    .bg-light-soft { background-color: #f8f9fa; }
+    .card { border: none; border-radius: 12px; transition: transform 0.2s; }
+    .side-link { border: none; border-radius: 8px !important; margin-bottom: 5px; color: #495057; }
+    .side-link.active { background-color: #0d6efd !important; color: white !important; }
+    .order-card { border: 1px solid #edf2f7; }
+    .status-badge { font-size: 0.75rem; padding: 5px 12px; border-radius: 50px; }
+    .product-img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
+</style>
+
+<section class="section-content padding-y-sm bg-light-soft min-vh-100">
+    <div class="container py-5">
+        
+        <!-- Flash Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{message.tags}} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> {{message}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Sidebar Navigation -->
+             {% include 'dashboard/sidebar.html' %}
+
+            <!-- Main Content Area -->
+            <main class="col-lg-9">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold">Recent Orders</h5>
+                            <span class="badge bg-primary-soft text-primary">Last 30 Days</span>
+                        </div>
+                    </div>
+
+                    <!-- Order Item -->
+                    <div class="card-body border-top">
+                        <div class="row align-items-center mb-3">
+                            <div class="col-md-8">
+                                <p class="text-muted small mb-1">Order <span class="text-dark fw-medium">#ID-88210</span> • Oct 24, 2023</p>
+                                <span class="badge bg-success-subtle text-success status-badge">Shipped</span>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">View Details</a>
+                            </div>
+                        </div>
+
+                        <div class="order-card p-3 rounded-3">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-auto">
+                                    <img src="https://via.placeholder.com" class="product-img" alt="Product">
+                                </div>
+                                <div class="col">
+                                    <h6 class="mb-0 fw-bold">Premium Wireless Headphones</h6>
+                                    <p class="text-muted small mb-0">Vendor: <span class="text-dark">SoundMaster Pro</span></p>
+                                </div>
+                                <div class="col-auto text-end">
+                                    <p class="fw-bold mb-0">$199.00</p>
+                                    <p class="text-muted small mb-0">Qty: 1</p>
+                                </div>
+                                <div class="col-12 col-md-auto ms-md-auto">
+                                    <button class="btn btn-primary btn-sm w-100 px-4">
+                                        <i class="bi bi-geo-alt me-1"></i> Track Order
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-sm-6">
+                                <p class="small text-muted mb-1">Delivery Address</p>
+                                <p class="small fw-medium mb-0">123 Tech Lane, Silicon Valley, CA</p>
+                            </div>
+                            <div class="col-sm-6 text-sm-end">
+                                <p class="small text-muted mb-1">Payment Method</p>
+                                <p class="small fw-medium mb-0">Visa •••• 4242</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -35,7 +35,8 @@ class UsersManager(BaseUserManager):
         user.is_admin = True
         user.is_active = True
         user.is_staff = True
-        user.is_superadmin = True
+        # user.is_superadmin = True
+        user.is_superuser = True
         user.save(using=self._db)
         return user
 
@@ -52,7 +53,8 @@ class Users(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
-    is_superadmin = models.BooleanField(default=False)
+    # is_superadmin = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     # set login field 
 
@@ -70,6 +72,8 @@ class Users(AbstractBaseUser):
     def has_module_perms(self, add_label):
         return True
     
+    def get_fullname(self):
+        return f'{self.first_name} {self.last_name}'
 
     class Meta:
         verbose_name_plural = 'Users'

@@ -8,7 +8,7 @@
 
                 <div class="col-lg-10 col-12">
                     <h1>
-                        <span class="d-block text-primary">Choose your</span>
+                        <span class="d-block text-primary">Search your</span>
                         <span class="d-block text-dark">favorite stuffs</span>
                     </h1>
                 </div>
@@ -20,15 +20,17 @@
         <div class="container">
             <div class="row">
                 
+                {% if searched_items %}
                 <div class="col-12">
-                    <h2 class="mb-2">New Arrivals</h2>
-                    {% if search_count == 1 %}
+                    {% if search_count <= 1 %}
+                        <h2 class="mb-2">Search Result</h2>
                         <p class="lead display-5 text-end">{{search_count}} product found</p>
                     {% else %}
+                        <h2 class="mb-2">Search Results</h2>
                         <p class="lead display-5 text-end">{{search_count}} products found</p>
                     {% endif %}
                 </div>
-                {% if searched_items %}
+                
                     {% for searched_item in searched_items %}
                         <div class="col-lg-4 col-12 mb-3">
                             <div class="product-thumb">
@@ -60,6 +62,8 @@
                             </div>
                         </div>
                     {% endfor %}
+                {% else %}
+                    <p class="card-text">Your search returns no result. Please try again with a specific keyword</p>
                 {% endif %}
 
                 

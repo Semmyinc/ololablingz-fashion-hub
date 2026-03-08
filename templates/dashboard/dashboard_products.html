@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<br><br><br><br>
+<!-- Add Google Fonts and Bootstrap Icons for a modern look -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net">
+
+<style>
+    .bg-light-soft { background-color: #f8f9fa; }
+    .card { border: none; border-radius: 12px; transition: transform 0.2s; }
+    .side-link { border: none; border-radius: 8px !important; margin-bottom: 5px; color: #495057; }
+    .side-link.active { background-color: #0d6efd !important; color: white !important; }
+    .order-card { border: 1px solid #edf2f7; }
+    .status-badge { font-size: 0.75rem; padding: 5px 12px; border-radius: 50px; }
+    .product-img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
+</style>
+
+<section class="section-content padding-y-sm bg-light-soft min-vh-100">
+    <div class="container py-5">
+        
+        <!-- Flash Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{message.tags}} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> {{message}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Sidebar Navigation -->
+             {% include 'dashboard/sidebar.html' %}
+
+            
+            <!-- Main Content Area -->
+            <main class="col-lg-9">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold">Product Catalog</h5>
+                            <!-- <span class="badge bg-primary-soft text-primary">Add Product</span> -->
+                             <a href="{% url 'dashboard_add_product' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3"><i class="bi bi-bag-check me-2"></i>&nbsp;Add Product</a>
+                        </div>
+                    </div>
+
+                    <!-- Order Item -->
+                    <div class="card-body border-top">
+                        <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted small text-uppercase">
+                            <tr>
+                                <th class="ps-4">#</th>
+                                <!-- <th>Image</th> -->
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Stock</th>
+                                <th>Price</th>
+                                <th>Promo</th>
+                                <th>Promo Price</th>
+                                <th class="text-center">Created At</th>
+                                <th class="text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td class="ps-4 text-muted">{{forloop.counter}}</td>
+                                <td class="fw-bold text-dark">{{product.product_name}}</td>
+                                <td><span class="badge bg-light text-dark border">{{product.category}}</span></td>
+                                <td>{{product.stock_level}}</td>
+                               <td>{{product.price}}</td>
+                               <td>{{product.promo}}</td>
+                               <td>{{product.promo_price}}</td>
+                               <td>{{product.created_at | date:'M d, Y'}}</td>
+                               <!-- <td>{{product.promo_price}}</td> -->
+                               <td>
+                                    <span class="badge bg-light text-dark border"><a href="{% url 'dashboard_edit_product' product.slug %}"><i class="bi bi-pencil-fill text-primary"></i></a></span>&nbsp; &nbsp;
+                                    <span class="badge bg-light text-dark border"><a href="{% url 'dashboard_delete_product' product.slug %}" onclick="return confirm('Delete this user?')"><i class="bi bi-trash-fill text-danger"></i></a></span>
+                               </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+
+ 

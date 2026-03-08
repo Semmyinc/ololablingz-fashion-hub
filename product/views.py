@@ -78,7 +78,7 @@ def search(request):
     if request.method == 'POST':
         search = request.POST['search']
         searched_items = Product.objects.filter(Q(product_name__icontains=search)|
-                                          
+                                        #   Q(product__category_name__icontains=search)|
                                           Q(category__category_name__icontains=search)|
                                           Q(category__description__icontains=search)|
                                           Q(description__icontains=search)|

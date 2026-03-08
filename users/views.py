@@ -209,10 +209,10 @@ def activate(request, uidb64, token):
         messages.info(request, f'Invalid Activation Link')
         return redirect('register')
     
-def dashboard(request):
+# def dashboard(request):
 
-    context = {}
-    return render(request, 'users/dashboard.html', context)
+#     context = {}
+#     return render(request, 'users/dashboard.html', context)
 
 
 def forgot_password(request):
